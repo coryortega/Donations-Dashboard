@@ -1,11 +1,12 @@
 import Button from "@mui/material/Button";
 import { TableView } from "./TableView";
 import Papa from "papaparse";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FileTabs } from "./FileTabs";
 import { useDashboardContext } from "./context/context";
 import { useNavigate } from "react-router-dom";
 import { COLUMNS_NEEDED } from "../constants";
+import Tooltip from "@mui/material/Tooltip";
 import {
   accumulateAmountByYear,
   countGiftsByYear,
@@ -16,26 +17,37 @@ import {
   averageDonorLifespan,
   averageGift,
   getDonorTypesByYear,
-  getSingleAndMultiDonors
+  getSingleAndMultiDonors,
 } from "../utils";
 
 const transformArrayToObject = (array) => {
   return array.reduce((acc, obj) => {
-    const { 'Constituent ID': id, ...rest } = obj;
+    const { "Constituent ID": id, ...rest } = obj;
     acc[id] = rest;
     return acc;
   }, {});
 };
 
+const validateHeaders = (columnsNeeded, headers) => {
+  const needed = [];
+  for (const header of columnsNeeded) {
+    if (!headers.includes(header)) {
+      needed.push(header);
+    }
+  }
+  return needed;
+};
+
 export const Import = () => {
   const [columnNames, setColumnNames] = useState({});
   const [values, setValues] = useState({});
-  const [files, setFiles] = useState([])
+  const [files, setFiles] = useState([]);
+  const [headers, setHeaders] = useState([]);
   const [currentFile, setCurrentFile] = useState("");
+  const [headersNeeded, setHeadersNeeded] = useState(COLUMNS_NEEDED);
   const navigate = useNavigate();
 
-  const { setDonations, setDonors, setDashboardData } =
-    useDashboardContext();
+  const { setDashboardData } = useDashboardContext();
 
   const tabChangeHandler = (newValue) => {
     setCurrentFile(newValue);
@@ -45,6 +57,7 @@ export const Import = () => {
     const fileName = event.target.files[0].name;
     setFiles([...files, fileName]);
     setCurrentFile(fileName);
+    const currHeaders = [];
     Papa.parse(event.target.files[0], {
       header: true,
       skipEmptyLines: true,
@@ -67,7 +80,9 @@ export const Import = () => {
             width: 160,
             editable: false,
           });
+          currHeaders.push(columnName);
         });
+        setHeaders([...headers, ...currHeaders]);
         setColumnNames({ ...columnNames, [fileName]: columnsArray });
         setValues({ ...values, [fileName]: valuesArray });
       },
@@ -87,14 +102,18 @@ export const Import = () => {
       total_monthly_donations: revenuByMonth(donations),
       first_time_donors: getFirstTimeDonors(donations),
       single_and_multi_donors: getSingleAndMultiDonors(donations),
-      donor_types_by_year: getDonorTypesByYear(donations, donorsObj), 
+      donor_types_by_year: getDonorTypesByYear(donations, donorsObj),
       history: {
         avg_gift: averageGift(donations),
         avg_gift_3: averageGift(donations, 3),
         avg_donor_lifespan: averageDonorLifespan(donations),
         avg_donor_lifespan_3: averageDonorLifespan(donations, 3),
         avg_donor_frequency: averageDonorFrequency(donations),
-        avg_donor_frequency_3: averageDonorFrequency(donations, startTime, endTime),
+        avg_donor_frequency_3: averageDonorFrequency(
+          donations,
+          startTime,
+          endTime
+        ),
       },
       revenue_by_segment: {
         1: revenueBySegment(donations, 1),
@@ -103,6 +122,11 @@ export const Import = () => {
     });
     navigate("/");
   };
+
+  useEffect(() => {
+    const needed = validateHeaders(COLUMNS_NEEDED, headers);
+    setHeadersNeeded(needed);
+  }, [headers]);
 
   return (
     <div>
@@ -113,29 +137,56 @@ export const Import = () => {
           justifyContent: "space-between",
         }}
       >
-        <FileTabs fileNames={files} tabChangeHandler={tabChangeHandler} />
-        <input
-          style={{ display: "none" }}
-          id="raised-button-file"
-          multiple
-          type="file"
-          accept=".csv"
-          onChange={changeHandler}
-        />
-        <label htmlFor="raised-button-file">
-          <Button variant="outlined" component="span">
-            Import CSV
-          </Button>
-        </label>
-        <Button
-          variant="outlined"
-          color="success"
-          disabled={!Object.keys(values).length}
-          onClick={handleDashboardCreate}
-          // component={Link} to="/"
-        >
-          Generate Dashboard
-        </Button>
+        <div style={{width: "100%"}}>
+          <FileTabs fileNames={files} tabChangeHandler={tabChangeHandler} />
+        </div>
+        <div style={{display: "flex", width: "480px"}}>
+          <input
+            style={{ display: "none" }}
+            id="raised-button-file"
+            multiple={false}
+            type="file"
+            accept=".csv"
+            onChange={changeHandler}
+          />{" "}
+          <label htmlFor="raised-button-file">
+            <Button variant="outlined" component="span">
+              Import CSV
+            </Button>
+          </label>
+          <Tooltip
+            disableHoverListener={!headersNeeded.length}
+            title={
+              <p style={{ fontSize: "15px" }}>
+                Missing required headers:{" "}
+                <strong>
+                  {headersNeeded.map((header, i) => {
+                    return `${header}${
+                      headersNeeded.length !== i + 1 ? "," : ""
+                    } `;
+                  })}
+                </strong>
+              </p>
+            }
+          >
+            <div
+              style={{
+                display: "inline-block", // Maintain the button's inline-block display
+                cursor: "not-allowed", // Show not-allowed cursor on hover
+                marginLeft: "10px"
+              }}
+            >
+              <Button
+                variant="outlined"
+                color="success"
+                disabled={headersNeeded.length}
+                onClick={handleDashboardCreate}
+              >
+                Generate Dashboard
+              </Button>
+            </div>
+          </Tooltip>
+        </div>
       </div>
       {files.length ? (
         files.map((file) => {
