@@ -44,7 +44,7 @@ export const Dashboard = () => {
           </ChartContainer>
         </Box>
         <Box sx={{ display: "flex" }}>
-          <Box sx={{ width: "65%" }}>
+          <Box sx={{ width: "100%" }}>
             <ChartContainer>
               <BasicLineChart
                 data={[dashboardData.total_annual_donations]}
@@ -74,7 +74,7 @@ export const Dashboard = () => {
             display: "flex",
           }}
         >
-          <Box sx={{ width: "65%" }}>
+          <Box sx={{ width: "100%" }}>
             <ChartContainer>
               <BasicBarChart
                 data={dashboardData.total_monthly_donations}
