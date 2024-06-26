@@ -140,7 +140,7 @@ export const Import = () => {
         <div style={{width: "100%"}}>
           <FileTabs fileNames={files} tabChangeHandler={tabChangeHandler} />
         </div>
-        <div style={{display: "flex", width: "424px"}}>
+        <div style={{display: "flex", width: "500px", justifyContent: "end"}}>
           <input
             style={{ display: "none" }}
             id="raised-button-file"
