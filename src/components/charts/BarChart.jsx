@@ -8,7 +8,7 @@ import { TimeSelector } from "../TimeSelector";
 
 const findMax = (arr) => {
   const filtered = arr.filter((item) => item !== "month");
-  return `${Math.max(...filtered.map(Number))}`;
+  return Math.max(...filtered.map(Number));
 };
 
 const formatDataKeys = (obj) => {
@@ -32,8 +32,8 @@ export const BasicBarChart = ({
   hideSelector = false,
   ...rest
 }) => {
-  const [startTime, setStartTime] = useState(findMax(Object.keys(data[0])) - 4);
-  const [endTime, setEndTime] = useState(findMax(Object.keys(data[0])));
+  const [startTime, setStartTime] = useState(findMax(Object.keys(data[0])) - 5);
+  const [endTime, setEndTime] = useState(findMax(Object.keys(data[0])) - 1);
   const [dataKeys, setDataKeys] = useState(formatDataKeys(data[0]));
 
   useEffect(() => {
