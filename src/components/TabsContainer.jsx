@@ -27,7 +27,7 @@ export const TabsContainer = (props) => {
         }}
         centered
       >
-        {["1 Year", "5 Years"].map((year, i) => {
+        {["2023", "2019 - 2023"].map((year, i) => {
           return <Tab label={year} value={year} key={i} />;
         })}
       </Tabs>

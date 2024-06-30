@@ -24,12 +24,14 @@ export const HistoryCards = ({
           iconComponent={PersonIcon}
           description="Average Donor Lifespan"
           number={avg_donor_lifespan + "yrs"}
+          sx={{ width: "86%" }}
           {...rest}
         />
         <HistoryCard
           iconComponent={TimelineIcon}
           description="Average Donor Frequency"
           number={avg_donor_frequency + " / yr"}
+          sx={{ width: "86%" }}
           {...rest}
         />
         <HistoryCard
@@ -38,6 +40,7 @@ export const HistoryCards = ({
           number={formatDollar(
             avg_gift * avg_donor_frequency * avg_donor_lifespan
           )}
+          sx={{ width: "86%" }}
           {...rest}
         />
       </Box>

@@ -1,25 +1,28 @@
 import { PieChart, pieArcLabelClasses } from "@mui/x-charts/PieChart";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import { COLOR_PALETTE } from "../../constants";
-import { mangoFusionPalette, cheerfulFiestaPalette } from "@mui/x-charts";
+import {
+  mangoFusionPaletteLight
+} from '@mui/x-charts/colorPalettes';
 const dataOne = [
-  { value: 30, label: "Newsletter" },
-  { value: 5, label: "Appeal" },
-  { value: 40, label: "Web" },
-  { value: 25, label: "Other" },
+  { value: 0, label: "Newsletter" },
+  { value: 0, label: "Appeal" },
+  { value: 0, label: "Web" },
+  { value: 0, label: "Other" },
+  { value: 100, label: "Unattributed" }
 ];
 
 const dataTwo = [
-  { value: 40, label: "Newsletter" },
-  { value: 25, label: "Appeal" },
-  { value: 20, label: "Web" },
-  { value: 15, label: "Other" },
+  { value: 0, label: "Newsletter" },
+  { value: 0, label: "Appeal" },
+  { value: 0, label: "Web" },
+  { value: 0, label: "Other" },
+  { value: 100, label: "Unattributed" }
 ];
 
 const size = {
-  width: 350,
-  height: 200,
+  width: 360,
+  height: 190,
 };
 
 export const BasicPieChart = ({
@@ -28,7 +31,7 @@ export const BasicPieChart = ({
   data1 = dataOne,
   data2 = dataTwo,
   ...rest
-}) => {
+}) => { 
   return (
     <Box
       sx={{
@@ -39,14 +42,14 @@ export const BasicPieChart = ({
       }}
     >
       <Typography variant="h6" sx={{ marginTop: "20px", textAlign: "center",  color: "#58595b" }}>
-        <strong>{title}</strong> <br /> <strong>Over {year}</strong>
+        <strong>{title}</strong> <br /> <strong>for {year}</strong>
       </Typography>
       <PieChart
         series={[
           {
             arcLabel: (item) => `${item.value}%`,
             arcLabelMinAngle: 15,
-            data: year === "1 Year" ? data1 : data2,
+            data: year === "2023" ? data1 : data2,
           },
         ]}
         sx={{
@@ -55,7 +58,7 @@ export const BasicPieChart = ({
             fontWeight: "bold",
           },
         }}
-        colors={mangoFusionPalette}
+        colors={mangoFusionPaletteLight}
         {...size}
         {...rest}
       />

@@ -137,10 +137,10 @@ export const Import = () => {
           justifyContent: "space-between",
         }}
       >
-        <div style={{width: "100%"}}>
+        <div style={{ width: "100%" }}>
           <FileTabs fileNames={files} tabChangeHandler={tabChangeHandler} />
         </div>
-        <div style={{display: "flex", width: "500px", justifyContent: "end"}}>
+        <div style={{ display: "flex", width: "500px", justifyContent: "end" }}>
           <input
             style={{ display: "none" }}
             id="raised-button-file"
@@ -157,23 +157,27 @@ export const Import = () => {
           <Tooltip
             disableHoverListener={!headersNeeded.length}
             title={
-              <p style={{ fontSize: "15px" }}>
-                Missing required headers:{" "}
-                <strong>
-                  {headersNeeded.map((header, i) => {
-                    return `${header}${
-                      headersNeeded.length !== i + 1 ? "," : ""
-                    } `;
-                  })}
-                </strong>
-              </p>
+              headersNeeded.length ? (
+                <p style={{ fontSize: "15px" }}>
+                  Missing required headers:{" "}
+                  <strong>
+                    {headersNeeded.map((header, i) => {
+                      return `${header}${
+                        headersNeeded.length !== i + 1 ? "," : ""
+                      } `;
+                    })}
+                  </strong>
+                </p>
+              ) : (
+                ""
+              )
             }
           >
             <div
               style={{
                 display: "inline-block", // Maintain the button's inline-block display
                 cursor: "not-allowed", // Show not-allowed cursor on hover
-                marginLeft: "10px"
+                marginLeft: "10px",
               }}
             >
               <Button

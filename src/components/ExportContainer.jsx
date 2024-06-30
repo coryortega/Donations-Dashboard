@@ -7,6 +7,19 @@ import { HistoryCards } from "./charts/HistoryCards";
 import { LetterPaper } from "./LetterPaper";
 import { filterYears, transformDataByYear } from "../utils";
 
+import { styled } from '@mui/material/styles';
+
+// Define styles for print
+const PrintStyles = styled('style')`
+  @media print {
+    .printable-paper {
+      background-color: blue !important;
+      -webkit-print-color-adjust: exact; /* For WebKit-based browsers */
+      color-adjust: exact;               /* For other browsers */
+    }
+  }
+`;
+
 export const ExportContainer = () => {
   const { dashboardData } = useDashboardContext();
   const skipInteractions = {
@@ -28,6 +41,7 @@ export const ExportContainer = () => {
         background: "grey",
       }}
     >
+      <PrintStyles/>
       <LetterPaper isLandscape={true} isFirst={true}>
         {Object.keys(dashboardData).length ? (
           <>
@@ -148,6 +162,7 @@ export const ExportContainer = () => {
                     title="Total Monthly Donations"
                     height={260}
                     width={490}
+                    hideSelector={true}
                     margin={{
                       top: 15,
                       left: 48,
@@ -172,7 +187,7 @@ export const ExportContainer = () => {
           ""
         )}
       </LetterPaper>
-      <LetterPaper isFirst={false} isLandscape={true}>
+      <LetterPaper isFirst={false} isLandscape={true} className="is-not-first">
         {Object.keys(dashboardData).length ? (
           <>
             <Typography
@@ -253,7 +268,7 @@ export const ExportContainer = () => {
           </>
         ) : null}
       </LetterPaper>
-      <LetterPaper isFirst={false} isLandscape={true}>
+      <LetterPaper isFirst={false} isLandscape={true} className="is-not-first">
         {Object.keys(dashboardData).length ? (
           <>
             <Typography

@@ -35,9 +35,62 @@ const getNumberOfDonors = (donations, years) => {
   return number;
 };
 
+const yearsDonatedByDonor = (donations, startTime = null, endTime = null) => {
+  const yearDonorMap = {};
+  const amountDonorDonated = {};
+
+  donations.forEach((donation) => {
+    const giftDate = donation["Gift Date"];
+    const donorId = donation["Constituent ID"];
+    const [, , year] = giftDate.split("/");
+    const giftYear =
+      parseInt(year) < 50 ? 2000 + parseInt(year) : 1900 + parseInt(year);
+
+    if (startTime && endTime) {
+      if (giftYear >= startTime && giftYear <= endTime) {
+        if (!(giftYear in yearDonorMap)) {
+          yearDonorMap[giftYear] = [];
+        }
+
+        if (!yearDonorMap[giftYear].includes(donorId)) {
+          yearDonorMap[giftYear] = [...yearDonorMap[giftYear], donorId];
+        }
+      }
+    } else {
+      if (!(giftYear in yearDonorMap)) {
+        yearDonorMap[giftYear] = [];
+      }
+
+      if (!yearDonorMap[giftYear].includes(donorId)) {
+        yearDonorMap[giftYear] = [...yearDonorMap[giftYear], donorId];
+      }
+    }
+  });
+
+  for (const year in yearDonorMap) {
+    const donors = yearDonorMap[year];
+    for (const id of donors) {
+      if (id in amountDonorDonated) {
+        amountDonorDonated[id]++;
+      } else {
+        amountDonorDonated[id] = 1;
+      }
+    }
+  }
+
+  const sum = Object.values(amountDonorDonated).reduce(
+    (partialSum, a) => partialSum + a,
+    0
+  );
+
+  return sum;
+};
+
 export const averageGift = (data, years = null) => {
   const total = sumAccountAmounts(data, years);
-  const numberOfDonations = years ? getNumberOfDonors(data, years) : data.length;
+  const numberOfDonations = years
+    ? getNumberOfDonors(data, years)
+    : data.length;
   return total / numberOfDonations;
 };
 
@@ -111,17 +164,20 @@ const countUniqueDonors = (
 };
 
 export const averageDonorLifespan = (donations, years = null) => {
-  let startTime, endTime, uniqueDonors
+  let startTime, endTime, uniqueDonors, sum;
   if (years) {
     const lastYear = new Date().getFullYear() - 1;
     startTime = lastYear - years;
     endTime = lastYear;
     uniqueDonors = countUniqueDonors(donations, startTime, endTime);
+    sum = yearsDonatedByDonor(donations, startTime, endTime);
   } else {
-    uniqueDonors = countUniqueDonors(donations) 
+    uniqueDonors = countUniqueDonors(donations);
+    sum = yearsDonatedByDonor(donations);
   }
-  const totalYears = years ? years : calculateTotalYears(donations);
-  return Math.round((totalYears / uniqueDonors) * 1000) / 1000;
+  // const totalYears = years ? years : calculateTotalYears(donations);
+  // const sum = yearsDonatedByDonor(donations);
+  return Math.round(sum / uniqueDonors);
 };
 
 export const averageDonorFrequency = (
@@ -129,9 +185,20 @@ export const averageDonorFrequency = (
   startTime = null,
   endTime = null
 ) => {
-  const numberOfDonations = startTime ? getNumberOfDonors(donations, 3) : donations.length;
+  const numberOfDonations = startTime
+    ? getNumberOfDonors(donations, 3)
+    : donations.length;
   const uniqueDonors = countUniqueDonors(donations, startTime, endTime);
-
+  const years = calculateTotalYears(donations);
+  console.log(
+    "number of donations: ",
+    numberOfDonations,
+    "uniqueDonors: ",
+    uniqueDonors,
+    "years: ",
+    years
+  );
+  //total number of donations / number of years * unique donors
   return Math.round(numberOfDonations / uniqueDonors);
 };
 
@@ -251,7 +318,7 @@ const monthMappings = {
   12: "Dec",
 };
 
-export const revenuByMonth = (donations, previousYears = 5) => {
+export const revenuByMonth = (donations, previousYears = null) => {
   const monthObject = {};
 
   donations.forEach((donation) => {
@@ -262,7 +329,19 @@ export const revenuByMonth = (donations, previousYears = 5) => {
       const monthAbbreviation = monthMappings[month];
       const currentYear = new Date().getFullYear();
 
-      if (year > currentYear - previousYears) {
+      if (previousYears && year > currentYear - previousYears) {
+        if (monthAbbreviation in monthObject) {
+          if (year in monthObject[monthAbbreviation]) {
+            monthObject[monthAbbreviation][year] =
+              monthObject[monthAbbreviation][year] + Number(amount);
+          } else {
+            monthObject[monthAbbreviation][year] = Number(amount);
+          }
+        } else {
+          monthObject[monthAbbreviation] = {};
+          monthObject[monthAbbreviation][year] = Number(amount);
+        }
+      } else {
         if (monthAbbreviation in monthObject) {
           if (year in monthObject[monthAbbreviation]) {
             monthObject[monthAbbreviation][year] =
@@ -305,9 +384,13 @@ export const revenueBySegment = (donations, previousYears = 5) => {
   donations.forEach((donation) => {
     const amount = parseInt(donation["Account Amount"]);
     const currentYear = new Date().getFullYear();
+    const lastYear = currentYear - 1;
     const [, , year] = donation["Gift Date"].split("/");
     const fullYear = parseInt(year) < 50 ? `20${year}` : `19${year}`;
-    if (parseInt(fullYear) >= currentYear - previousYears) {
+    if (
+      parseInt(fullYear) >= lastYear - previousYears &&
+      parseInt(fullYear) < currentYear
+    ) {
       numberOfDonors += 1;
       switch (true) {
         case isBetween(amount, 0, 49):
