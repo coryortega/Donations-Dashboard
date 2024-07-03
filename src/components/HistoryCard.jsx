@@ -30,7 +30,7 @@ export const HistoryCard = ({
         className="printable-paper"
         backgroundColor="#048c88"
         color="white"
-        sx={{ backgroundColor: "#048c88", color: "white" }}
+        sx={{ backgroundColor: "#048c88", color: "white", maxWidth: "350px" }}
       >
         <Box
           sx={{

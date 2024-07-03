@@ -18,6 +18,7 @@ import {
   averageGift,
   getDonorTypesByYear,
   getSingleAndMultiDonors,
+  averageDonorGift,
 } from "../utils";
 
 const transformArrayToObject = (array) => {
@@ -106,6 +107,7 @@ export const Import = () => {
       history: {
         avg_gift: averageGift(donations),
         avg_gift_3: averageGift(donations, 3),
+        avg_donor_gift: averageDonorGift(donations),
         avg_donor_lifespan: averageDonorLifespan(donations),
         avg_donor_lifespan_3: averageDonorLifespan(donations, 3),
         avg_donor_frequency: averageDonorFrequency(donations),

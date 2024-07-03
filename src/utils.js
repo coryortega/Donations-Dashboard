@@ -94,6 +94,12 @@ export const averageGift = (data, years = null) => {
   return total / numberOfDonations;
 };
 
+export const averageDonorGift = (data, years = null) => {
+  const total = sumAccountAmounts(data, years);
+  const uniqueDonors = countUniqueDonors(data);
+  return total / uniqueDonors;
+};
+
 export const formatDollar = (number) => {
   // Check if the input is a valid number
   if (typeof number !== "number" || isNaN(number)) {
@@ -175,8 +181,6 @@ export const averageDonorLifespan = (donations, years = null) => {
     uniqueDonors = countUniqueDonors(donations);
     sum = yearsDonatedByDonor(donations);
   }
-  // const totalYears = years ? years : calculateTotalYears(donations);
-  // const sum = yearsDonatedByDonor(donations);
   return Math.round(sum / uniqueDonors);
 };
 
@@ -198,7 +202,6 @@ export const averageDonorFrequency = (
     "years: ",
     years
   );
-  //total number of donations / number of years * unique donors
   return Math.round(numberOfDonations / uniqueDonors);
 };
 
@@ -323,36 +326,21 @@ export const revenuByMonth = (donations, previousYears = null) => {
 
   donations.forEach((donation) => {
     if ("Gift Date" in donation && "Account Amount" in donation) {
-      const [, month, abbreviatedYear] = donation["Gift Date"].split("/");
+      const [month, , abbreviatedYear] = donation["Gift Date"].split("/");
       const amount = donation["Account Amount"];
       const year = mapYearAbbreviationToFullYear(Number(abbreviatedYear));
       const monthAbbreviation = monthMappings[month];
-      const currentYear = new Date().getFullYear();
 
-      if (previousYears && year > currentYear - previousYears) {
-        if (monthAbbreviation in monthObject) {
-          if (year in monthObject[monthAbbreviation]) {
-            monthObject[monthAbbreviation][year] =
-              monthObject[monthAbbreviation][year] + Number(amount);
-          } else {
-            monthObject[monthAbbreviation][year] = Number(amount);
-          }
+      if (monthAbbreviation in monthObject) {
+        if (year in monthObject[monthAbbreviation]) {
+          monthObject[monthAbbreviation][year] =
+            monthObject[monthAbbreviation][year] + Number(amount);
         } else {
-          monthObject[monthAbbreviation] = {};
           monthObject[monthAbbreviation][year] = Number(amount);
         }
       } else {
-        if (monthAbbreviation in monthObject) {
-          if (year in monthObject[monthAbbreviation]) {
-            monthObject[monthAbbreviation][year] =
-              monthObject[monthAbbreviation][year] + Number(amount);
-          } else {
-            monthObject[monthAbbreviation][year] = Number(amount);
-          }
-        } else {
-          monthObject[monthAbbreviation] = {};
-          monthObject[monthAbbreviation][year] = Number(amount);
-        }
+        monthObject[monthAbbreviation] = {};
+        monthObject[monthAbbreviation][year] = Number(amount);
       }
     }
   });
@@ -443,6 +431,10 @@ export const revenueBySegment = (donations, previousYears = 5) => {
   ];
 };
 
+/*
+  Loop through the years and the first time we recognize a new donor,
+  we note the year they donated and increment that years value
+*/
 export const getFirstTimeDonors = (donations) => {
   const donorsByYear = {};
   const uniqueDonors = [];
@@ -463,6 +455,10 @@ export const getFirstTimeDonors = (donations) => {
   return donorsByYear;
 };
 
+/*
+  Single donors are donors that have only donated once for a given year. 
+  Multi donors are donors that have donated two or more times each year
+*/
 export const getSingleAndMultiDonors = (donations) => {
   const donorsPerYear = {};
   const uniqueDonorsPerYear = {};

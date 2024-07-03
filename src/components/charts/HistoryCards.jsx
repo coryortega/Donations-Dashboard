@@ -13,7 +13,7 @@ export const HistoryCards = ({
 }) => {
   return (
     <Box>
-      <Box sx={{ display: "flex" }}>
+      <Box sx={{ display: "flex", justifyContent: "space-between" }}>
         <HistoryCard
           iconComponent={PaidIcon}
           description="Average Gift"
