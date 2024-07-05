@@ -30,6 +30,7 @@ export const BasicPieChart = ({
   title,
   data1 = dataOne,
   data2 = dataTwo,
+  percent = true,
   ...rest
 }) => { 
   return (
@@ -47,7 +48,7 @@ export const BasicPieChart = ({
       <PieChart
         series={[
           {
-            arcLabel: (item) => `${item.value}%`,
+            arcLabel: (item) => `${item.value}${percent ? '%' : ''}`,
             arcLabelMinAngle: 15,
             data: year === "2023" ? data1 : data2,
           },

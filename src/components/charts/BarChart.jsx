@@ -75,6 +75,7 @@ export const BasicBarChart = ({
         series={dataKeys}
         height={400}
         colors={mangoFusionPalette}
+        grid={{ vertical: false, horizontal: true }}
         {...rest}
       />
     </>

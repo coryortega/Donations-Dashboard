@@ -3,11 +3,11 @@ function sumAccountAmounts(arrayOfObjects, years = null) {
   arrayOfObjects.forEach((obj) => {
     const giftDate = obj["Gift Date"];
     const [, , year] = giftDate.split("/");
-    const currentYear = new Date().getFullYear();
+    const previousYear = new Date().getFullYear() - 1;
     const fullYear =
       parseInt(year) < 50 ? 2000 + parseInt(year) : 1900 + parseInt(year);
-    if (fullYear < currentYear) {
-      if (years && fullYear >= currentYear - 1 - years) {
+    if (fullYear < previousYear) {
+      if (years && fullYear >= previousYear - 1 - years) {
         totalSum += Number(obj["Account Amount"]);
       } else if (!years) {
         totalSum += Number(obj["Account Amount"]);
@@ -95,9 +95,19 @@ export const averageGift = (data, years = null) => {
 };
 
 export const averageDonorGift = (data, years = null) => {
-  const total = sumAccountAmounts(data, years);
-  const uniqueDonors = countUniqueDonors(data);
-  return total / uniqueDonors;
+  let total, uniqueDonors;
+
+  if (years) {
+    const previousYear = new Date().getFullYear() - 1;
+    const startTime = previousYear - years;
+    total = sumAccountAmounts(data, years);
+    uniqueDonors = countUniqueDonors(data, startTime, previousYear);
+    return Math.round((total / uniqueDonors) * 100) / 100;
+  }
+
+  total = sumAccountAmounts(data);
+  uniqueDonors = countUniqueDonors(data);
+  return Math.round((total / uniqueDonors) * 100) / 100;
 };
 
 export const formatDollar = (number) => {
@@ -190,18 +200,9 @@ export const averageDonorFrequency = (
   endTime = null
 ) => {
   const numberOfDonations = startTime
-    ? getNumberOfDonors(donations, 3)
+    ? getNumberOfDonors(donations, endTime - startTime)
     : donations.length;
   const uniqueDonors = countUniqueDonors(donations, startTime, endTime);
-  const years = calculateTotalYears(donations);
-  console.log(
-    "number of donations: ",
-    numberOfDonations,
-    "uniqueDonors: ",
-    uniqueDonors,
-    "years: ",
-    years
-  );
   return Math.round(numberOfDonations / uniqueDonors);
 };
 
@@ -366,6 +367,69 @@ export const revenuByMonth = (donations, previousYears = null) => {
 
 const isBetween = (n, start, stop) => n >= start && n <= stop;
 
+export const donorsBySegment = (donations, previousYears = 5) => {
+  const segments = { 0: 0, 50: 0, 150: 0, 250: 0, 500: 0, 1000: 0 };
+  donations.forEach((donation) => {
+    const amount = parseInt(donation["Account Amount"]);
+    const currentYear = new Date().getFullYear();
+    const lastYear = currentYear - 1;
+    const [, , year] = donation["Gift Date"].split("/");
+    const fullYear = parseInt(year) < 50 ? `20${year}` : `19${year}`;
+    if (
+      parseInt(fullYear) >= lastYear - previousYears &&
+      parseInt(fullYear) < currentYear
+    ) {
+      switch (true) {
+        case isBetween(amount, 0, 49):
+          segments[0] = segments[0] += 1;
+          break;
+        case isBetween(amount, 50, 149):
+          segments[50] = segments[50] += 1;
+          break;
+        case isBetween(amount, 150, 249):
+          segments[150] = segments[150] += 1;
+          break;
+        case isBetween(amount, 250, 499):
+          segments[250] = segments[250] += 1;
+          break;
+        case isBetween(amount, 500, 999):
+          segments[500] = segments[500] += 1;
+          break;
+        default:
+          segments[1000] += 1;
+          break;
+      }
+    }
+  });
+
+  return [
+    {
+      value: segments[0],
+      label: "$0-$49",
+    },
+    {
+      value: segments[50],
+      label: "$50-$149",
+    },
+    {
+      value: segments[150],
+      label: "$150-$249",
+    },
+    {
+      value: segments[250],
+      label: "$250-$499",
+    },
+    {
+      value: segments[500],
+      label: "$500-$999",
+    },
+    {
+      value: segments[1000],
+      label: "$1000+",
+    },
+  ];
+};
+
 export const revenueBySegment = (donations, previousYears = 5) => {
   let numberOfDonors = 0;
   const segments = { 0: 0, 50: 0, 150: 0, 250: 0, 500: 0, 1000: 0 };
@@ -425,7 +489,7 @@ export const revenueBySegment = (donations, previousYears = 5) => {
       label: "$500-$999",
     },
     {
-      value: Math.round((segments[100] / numberOfDonors) * 100),
+      value: Math.round((segments[1000] / numberOfDonors) * 100),
       label: "$1000+",
     },
   ];
@@ -504,29 +568,24 @@ export const getSingleAndMultiDonors = (donations) => {
 
 export const getDonorTypesByYear = (donations, donors) => {
   const donorTypesByYear = {};
-  const unknownIds = [];
 
   donations.forEach((donation) => {
     const donorId = donation["Constituent ID"];
     const [, , year] = donation["Gift Date"].split("/");
     const fullYear = parseInt(year) < 50 ? `20${year}` : `19${year}`;
-    if (donorId in donors) {
-      const donorInfo = donors[donorId];
-      const donorType = donorInfo["Constituency Code"];
-      if (!(fullYear in donorTypesByYear)) {
-        donorTypesByYear[fullYear] = {};
-      }
-      if (donorType in donorTypesByYear[fullYear]) {
-        donorTypesByYear[fullYear][donorType] =
-          donorTypesByYear[fullYear][donorType] + 1;
-      } else {
-        donorTypesByYear[fullYear][donorType] = 1;
-      }
+
+    const donorInfo = donorId in donors ? donors[donorId] : null;
+    const donorType = donorInfo ? donorInfo["Constituency Code"] : "Unassigned";
+    if (!(fullYear in donorTypesByYear)) {
+      donorTypesByYear[fullYear] = {};
+    }
+    if (donorType in donorTypesByYear[fullYear]) {
+      donorTypesByYear[fullYear][donorType] =
+        donorTypesByYear[fullYear][donorType] + 1;
     } else {
-      unknownIds.push(donorId);
+      donorTypesByYear[fullYear][donorType] = 1;
     }
   });
-  console.log("Donations with unknown Id's: ", unknownIds.length);
   return donorTypesByYear;
 };
 
@@ -535,6 +594,21 @@ export const transformDataByYear = (data, key) => {
   for (const year in data) {
     if (key in data[year]) {
       result[year] = data[year][key];
+    }
+  }
+  return result;
+};
+
+export const getUnassigned = (data, keys) => {
+  const result = {};
+  for (const year in data) {
+    for (const key in data[year]) {
+      if(!(year in result)) {
+        result[year] = 0;
+      }
+      if (!(keys.includes(key))) {
+        result[year] = result[year] + data[year][key];
+      }
     }
   }
   return result;
@@ -556,3 +630,24 @@ export const filterYears = (yearsObj, from, to) => {
 
   return result;
 };
+
+export const getDonorsPerYear = (donations) => {
+  const donorsPerYear = {};
+  const returnObj = {};
+
+  donations.forEach(donation => {
+    const [, , year] = donation["Gift Date"].split("/"); 
+    const fullYear = parseInt(year) < 50 ? `20${year}` : `19${year}`;
+    const donorId = donation["Constituent ID"];
+    if(!(fullYear in donorsPerYear)) {
+      donorsPerYear[fullYear] = new Set();
+    }
+    donorsPerYear[fullYear].add(donorId);
+  })
+
+  for(const year in donorsPerYear) {
+    returnObj[year] = donorsPerYear[year].size;
+  }
+  
+  return returnObj;
+}

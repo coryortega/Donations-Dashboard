@@ -13,19 +13,14 @@ const MenuProps = {
   PaperProps: {
     style: {
       maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-      width: 250,
     },
   },
 };
 
-export const DropdownChecklist = ({
-  titles,
-  checkList,
-  handleChange,
-}) => {
+export const DropdownChecklist = ({ titles, checkList, handleChange }) => {
   return (
     <div style={{ marginTop: "10px" }}>
-      <FormControl sx={{ m: 1, width: 200 }} size="small">
+      <FormControl sx={{ m: 1, width: 200 }} size="small" fullWidth>
         <InputLabel id="demo-multiple-checkbox-label">Data</InputLabel>
         <Select
           labelId="demo-multiple-checkbox-label"
@@ -36,11 +31,13 @@ export const DropdownChecklist = ({
           input={<OutlinedInput label="Data" />}
           renderValue={(selected) => selected.join(", ")}
           MenuProps={MenuProps}
+          fullWidth={true}
+
         >
           {titles.map((title) => (
-            <MenuItem key={title} value={title}>
+            <MenuItem key={title} value={title} fullWidth>
               <Checkbox checked={checkList.indexOf(title) > -1} />
-              <ListItemText primary={title} />
+              <ListItemText primary={title} fullWidth />
             </MenuItem>
           ))}
         </Select>

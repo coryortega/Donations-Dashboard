@@ -222,6 +222,7 @@ export const ExportContainer = () => {
                 </Typography>
                 <HistoryCards
                   avg_gift={dashboardData?.history?.avg_gift}
+                  avg_donor_gift={dashboardData?.history?.avg_donor_gift}
                   avg_donor_frequency={
                     dashboardData?.history?.avg_donor_frequency
                   }
@@ -249,10 +250,11 @@ export const ExportContainer = () => {
                     color: "#58595b",
                   }}
                 >
-                  <strong>Last Three Years</strong>
+                  <strong>Last Five Years</strong>
                 </Typography>
                 <HistoryCards
                   avg_gift={dashboardData?.history?.avg_gift_3}
+                  avg_donor_gift={dashboardData?.history?.avg_donor_gift_3}
                   avg_donor_frequency={
                     dashboardData?.history?.avg_donor_frequency_3
                   }
@@ -306,7 +308,7 @@ export const ExportContainer = () => {
                     title="Donations by Segments"
                     width={325}
                     height={300}
-                    year={"1 Year"}
+                    year={"2023"}
                     data1={dashboardData.revenue_by_segment[1]}
                     data2={dashboardData.revenue_by_segment[5]}
                     slotProps={{
@@ -333,8 +335,8 @@ export const ExportContainer = () => {
                     title="Donations by Segments"
                     width={325}
                     height={300}
-                    year={"5 Years"}
-                    data1={dashboardData.revenue_by_segment[1]}
+                    year={"2019-2023"}
+                    data1={dashboardData.revenue_by_segment[5]}
                     data2={dashboardData.revenue_by_segment[5]}
                     slotProps={{
                       legend: {

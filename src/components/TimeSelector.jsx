@@ -30,7 +30,11 @@ export const TimeSelector = ({
     >
       <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
         <InputLabel id="demo-select-small-label">From</InputLabel>
-        <Select value={startTime} label="From" onChange={handleStartChange}>
+        <Select
+          value={startTime}
+          label="From"
+          onChange={handleStartChange}
+        >
           {options.map((option, i) => {
             return (
               <MenuItem key={i} value={option}>
@@ -44,10 +48,10 @@ export const TimeSelector = ({
         sx={{
           display: "flex",
           justifyContent: "center",
-          alignItems: "center"
+          alignItems: "center",
         }}
       >
-        <HorizontalRuleIcon htmlColor={"#c4c4c4"}/>
+        <HorizontalRuleIcon htmlColor={"#c4c4c4"} />
       </Box>
       <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
         <InputLabel id="demo-select-small-label">To</InputLabel>
