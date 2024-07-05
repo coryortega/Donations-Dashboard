@@ -43,7 +43,7 @@ export const Panel = () => {
               }}
             >
               <img
-                src="https://fluidcom.net/images/fluid-communications-inc-orange-ca.png"
+                src="https://www.fluidcom.net/images/fluid-communications-inc-orange-ca-small.png"
                 width="70%"
                 height="100%"
                 style={{ position: "absolute", top: 12 }}

@@ -1,15 +1,13 @@
 import { PieChart, pieArcLabelClasses } from "@mui/x-charts/PieChart";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import {
-  mangoFusionPaletteLight
-} from '@mui/x-charts/colorPalettes';
+import { mangoFusionPaletteLight } from "@mui/x-charts/colorPalettes";
 const dataOne = [
   { value: 0, label: "Newsletter" },
   { value: 0, label: "Appeal" },
   { value: 0, label: "Web" },
   { value: 0, label: "Other" },
-  { value: 100, label: "Unattributed" }
+  { value: 100, label: "Unattributed" },
 ];
 
 const dataTwo = [
@@ -17,7 +15,7 @@ const dataTwo = [
   { value: 0, label: "Appeal" },
   { value: 0, label: "Web" },
   { value: 0, label: "Other" },
-  { value: 100, label: "Unattributed" }
+  { value: 100, label: "Unattributed" },
 ];
 
 const size = {
@@ -32,7 +30,7 @@ export const BasicPieChart = ({
   data2 = dataTwo,
   percent = true,
   ...rest
-}) => { 
+}) => {
   return (
     <Box
       sx={{
@@ -42,13 +40,16 @@ export const BasicPieChart = ({
         justifyContent: "center",
       }}
     >
-      <Typography variant="h6" sx={{ marginTop: "20px", textAlign: "center",  color: "#58595b" }}>
+      <Typography
+        variant="h6"
+        sx={{ marginTop: "20px", textAlign: "center", color: "#58595b" }}
+      >
         <strong>{title}</strong> <br /> <strong>for {year}</strong>
       </Typography>
       <PieChart
         series={[
           {
-            arcLabel: (item) => `${item.value}${percent ? '%' : ''}`,
+            arcLabel: (item) => `${item.value}${percent ? "%" : ""}`,
             arcLabelMinAngle: 15,
             data: year === "2023" ? data1 : data2,
           },
