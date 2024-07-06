@@ -122,12 +122,12 @@ export const Import = () => {
         ),
       },
       revenue_by_segment: {
-        1: revenueBySegment(donations, 1),
-        5: revenueBySegment(donations),
+        1: revenueBySegment(donations, lastYear, lastYear),
+        5: revenueBySegment(donations, lastYear - 4, lastYear),
       },
       donors_by_segment: {
-        1: donorsBySegment(donations, 1),
-        5: donorsBySegment(donations),
+        1: donorsBySegment(donations, lastYear, lastYear),
+        5: donorsBySegment(donations, lastYear - 4, lastYear),
       }
     });
     navigate("/");
