@@ -6,8 +6,9 @@ function sumAccountAmounts(arrayOfObjects, years = null) {
     const previousYear = new Date().getFullYear() - 1;
     const fullYear =
       parseInt(year) < 50 ? 2000 + parseInt(year) : 1900 + parseInt(year);
-    if (fullYear < previousYear) {
-      if (years && fullYear >= previousYear - 1 - years) {
+    
+    if (fullYear <= previousYear) {
+      if (years && fullYear >= previousYear - years) {
         totalSum += Number(obj["Account Amount"]);
       } else if (!years) {
         totalSum += Number(obj["Account Amount"]);
@@ -107,6 +108,7 @@ export const averageDonorGift = (data, years = null) => {
 
   total = sumAccountAmounts(data);
   uniqueDonors = countUniqueDonors(data);
+  console.log("total: ", total, "unique donors: ", uniqueDonors)
   return Math.round((total / uniqueDonors) * 100) / 100;
 };
 
@@ -162,15 +164,16 @@ const countUniqueDonors = (
 
   // Iterate over each object in the array
   arrayOfObjects.forEach((obj) => {
+    const giftDate = new Date(obj["Gift Date"]).getFullYear();
+    const currentYear = new Date().getFullYear();
     // Check if startTime and endTime are provided and filter by time range
     if (startTime && endTime && "Gift Date" in obj) {
-      const giftDate = new Date(obj["Gift Date"]).getFullYear();
       if (giftDate >= startTime && giftDate <= endTime) {
         uniqueConstituents.add(obj["Constituent ID"]);
       }
     } else {
       // Add all constituents if no time range is provided
-      if ("Constituent ID" in obj) {
+      if ("Constituent ID" in obj && giftDate < currentYear) {
         uniqueConstituents.add(obj["Constituent ID"]);
       }
     }
