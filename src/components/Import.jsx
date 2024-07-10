@@ -97,7 +97,6 @@ export const Import = () => {
     const donorsObj = transformArrayToObject(donors);
     const donations = values["febccm_gift.csv"];
     const lastYear = new Date().getFullYear() - 1;
-    const startTime = lastYear - 5;
     const endTime = lastYear;
     setDashboardData({
       total_annual_donors: countGiftsByYear(donations),
@@ -109,15 +108,31 @@ export const Import = () => {
       donor_types_by_year: getDonorTypesByYear(donations, donorsObj),
       history: {
         avg_gift: averageGift(donations),
-        avg_gift_3: averageGift(donations, 5),
+        avg_gift_1: averageGift(donations, lastYear, lastYear),
+        avg_gift_3: averageGift(donations, lastYear - 5, lastYear),
         avg_donor_gift: averageDonorGift(donations),
-        avg_donor_gift_3: averageDonorGift(donations, 5),
+        avg_donor_gift_1: averageDonorGift(donations, lastYear, lastYear),
+        avg_donor_gift_3: averageDonorGift(donations, lastYear - 5, lastYear),
         avg_donor_lifespan: averageDonorLifespan(donations),
-        avg_donor_lifespan_3: averageDonorLifespan(donations, 5),
+        avg_donor_lifespan_1: averageDonorLifespan(
+          donations,
+          lastYear,
+          lastYear
+        ),
+        avg_donor_lifespan_3: averageDonorLifespan(
+          donations,
+          lastYear - 5,
+          lastYear
+        ),
         avg_donor_frequency: averageDonorFrequency(donations),
+        avg_donor_frequency_1: averageDonorFrequency(
+          donations,
+          lastYear,
+          endTime
+        ),
         avg_donor_frequency_3: averageDonorFrequency(
           donations,
-          startTime,
+          lastYear - 5,
           endTime
         ),
       },
@@ -128,7 +143,7 @@ export const Import = () => {
       donors_by_segment: {
         1: donorsBySegment(donations, lastYear, lastYear),
         5: donorsBySegment(donations, lastYear - 4, lastYear),
-      }
+      },
     });
     navigate("/");
   };

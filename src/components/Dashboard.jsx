@@ -19,11 +19,7 @@ export const Dashboard = () => {
   const { dashboardData } = useDashboardContext();
   if (Object.keys(dashboardData).length) {
     const { history } = dashboardData;
-    console.log(
-      "avg donor gift",
-      history.avg_donor_gift,
-      history.avg_donor_gift_3
-    );
+
     return (
       <Box>
         <Typography
@@ -36,8 +32,14 @@ export const Dashboard = () => {
         <Box sx={{ width: "99%" }}>
           <ChartContainer>
             <BasicLineChart
-              data={[dashboardData.total_annual_donors, dashboardData.donors_per_year]}
-              legend={["Total Annual Donations", "Total Annual Donors Per Year"]}
+              data={[
+                dashboardData.total_annual_donors,
+                dashboardData.donors_per_year,
+              ]}
+              legend={[
+                "Total Annual Donations",
+                "Total Annual Donors Per Year",
+              ]}
               title="Total Annual Donations"
               margin={{
                 top: 15,
@@ -124,6 +126,21 @@ export const Dashboard = () => {
             avg_donor_gift={history?.avg_donor_gift_3}
             avg_donor_frequency={history?.avg_donor_frequency_3}
             avg_donor_lifespan={history?.avg_donor_lifespan_3}
+          />
+          <Typography
+            variant="h5"
+            sx={{
+              marginTop: "20px",
+              color: "#58595b",
+            }}
+          >
+            <strong>Last Year (2023)</strong>
+          </Typography>
+          <HistoryCards
+            avg_gift={history?.avg_gift_1}
+            avg_donor_gift={history?.avg_donor_gift_1}
+            avg_donor_frequency={history?.avg_donor_frequency_1}
+            avg_donor_lifespan={history?.avg_donor_lifespan_1}
           />
         </Box>
         <Typography

@@ -17,9 +17,9 @@ export const HistoryCards = ({
       <Box sx={{ display: "flex", justifyContent: "space-between" }}>
         <HistoryCard
           iconComponent={PaidIcon}
-          description="Average Gift"
+          description="Average Donation"
           number={formatDollar(avg_gift)}
-          message="Average Gift = Total revenue received divided by total number of unique donors."
+          message="Average Donation = Total revenue received divided by total number of donations."
           {...rest}
         />
         <HistoryCard
@@ -27,7 +27,7 @@ export const HistoryCards = ({
           description="Average Donor Gift"
           number={formatDollar(avg_donor_gift)}
           message={
-            "Average Donor Gift = Total revenue received divided by total number of donations."
+            "Average Donor Gift = Total revenue received divided by total number of unique donors."
           }
           {...rest}
         />

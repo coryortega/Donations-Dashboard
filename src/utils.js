@@ -1,34 +1,32 @@
-function sumAccountAmounts(arrayOfObjects, years = null) {
+function sumAccountAmounts(arrayOfObjects, startTime = null, endTime = null) {
   let totalSum = 0;
   arrayOfObjects.forEach((obj) => {
     const giftDate = obj["Gift Date"];
     const [, , year] = giftDate.split("/");
-    const previousYear = new Date().getFullYear() - 1;
     const fullYear =
       parseInt(year) < 50 ? 2000 + parseInt(year) : 1900 + parseInt(year);
-    
-    if (fullYear <= previousYear) {
-      if (years && fullYear >= previousYear - years) {
-        totalSum += Number(obj["Account Amount"]);
-      } else if (!years) {
+
+    if (startTime && endTime) {
+      if (fullYear >= startTime && fullYear <= endTime) {
         totalSum += Number(obj["Account Amount"]);
       }
+    } else {
+      totalSum += Number(obj["Account Amount"]);
     }
   });
   return totalSum;
 }
 
-const getNumberOfDonors = (donations, years) => {
+const getNumberOfDonors = (donations, startTime, endTime) => {
   let number = 0;
 
   donations.forEach((obj) => {
     const giftDate = obj["Gift Date"];
     const [, , year] = giftDate.split("/");
-    const lastYear = new Date().getFullYear() - 1;
-    const giftYear =
+    const fullYear =
       parseInt(year) < 50 ? 2000 + parseInt(year) : 1900 + parseInt(year);
 
-    if (giftYear >= lastYear - years) {
+    if (fullYear >= startTime && fullYear <= endTime) {
       number = number + 1;
     }
   });
@@ -87,28 +85,57 @@ const yearsDonatedByDonor = (donations, startTime = null, endTime = null) => {
   return sum;
 };
 
-export const averageGift = (data, years = null) => {
-  const total = sumAccountAmounts(data, years);
-  const numberOfDonations = years
-    ? getNumberOfDonors(data, years)
-    : data.length;
+const sumUniqueDonorsPerYear = (
+  donations,
+  startTime = null,
+  endTime = null
+) => {
+  const yearsObj = {};
+  let result = 0;
+
+  donations.forEach((donation) => {
+    const donorId = donation["Constituent ID"];
+    const [, , year] = donation["Gift Date"].split("/");
+    const fullYear = parseInt(year) < 50 ? `20${year}` : `19${year}`;
+
+    if (!(fullYear in yearsObj)) {
+      yearsObj[fullYear] = new Set();
+    }
+    yearsObj[fullYear].add(donorId);
+  });
+
+  for (const year in yearsObj) {
+    if (startTime && endTime) {
+      if (year >= startTime && year <= endTime) {
+        result += yearsObj[year].size;
+      }
+    } else {
+      result += yearsObj[year].size;
+    }
+  }
+
+  return result;
+};
+
+export const averageGift = (data, startTime = null, endTime = null) => {
+  const total = sumAccountAmounts(data, startTime, endTime);
+  const numberOfDonations =
+    startTime && endTime
+      ? getNumberOfDonors(data, startTime, endTime)
+      : data.length;
   return total / numberOfDonations;
 };
 
-export const averageDonorGift = (data, years = null) => {
+export const averageDonorGift = (data, startTime = null, endTime) => {
   let total, uniqueDonors;
-
-  if (years) {
-    const previousYear = new Date().getFullYear() - 1;
-    const startTime = previousYear - years;
-    total = sumAccountAmounts(data, years);
-    uniqueDonors = countUniqueDonors(data, startTime, previousYear);
+  if (startTime && endTime) {
+    total = sumAccountAmounts(data, startTime, endTime);
+    uniqueDonors = sumUniqueDonorsPerYear(data, startTime, endTime);
     return Math.round((total / uniqueDonors) * 100) / 100;
   }
 
   total = sumAccountAmounts(data);
-  uniqueDonors = countUniqueDonors(data);
-  console.log("total: ", total, "unique donors: ", uniqueDonors)
+  uniqueDonors = sumUniqueDonorsPerYear(data);
   return Math.round((total / uniqueDonors) * 100) / 100;
 };
 
@@ -182,12 +209,13 @@ const countUniqueDonors = (
   return uniqueConstituents.size;
 };
 
-export const averageDonorLifespan = (donations, years = null) => {
-  let startTime, endTime, uniqueDonors, sum;
-  if (years) {
-    const lastYear = new Date().getFullYear() - 1;
-    startTime = lastYear - years;
-    endTime = lastYear;
+export const averageDonorLifespan = (
+  donations,
+  startTime = null,
+  endTime = null
+) => {
+  let uniqueDonors, sum;
+  if (startTime && endTime) {
     uniqueDonors = countUniqueDonors(donations, startTime, endTime);
     sum = yearsDonatedByDonor(donations, startTime, endTime);
   } else {
@@ -202,9 +230,10 @@ export const averageDonorFrequency = (
   startTime = null,
   endTime = null
 ) => {
-  const numberOfDonations = startTime
-    ? getNumberOfDonors(donations, endTime - startTime)
-    : donations.length;
+  const numberOfDonations =
+    startTime && endTime
+      ? getNumberOfDonors(donations, startTime, endTime)
+      : donations.length;
   const uniqueDonors = countUniqueDonors(donations, startTime, endTime);
   return Math.round(numberOfDonations / uniqueDonors);
 };
@@ -370,34 +399,32 @@ const isBetween = (n, start, stop) => n >= start && n <= stop;
 
 export const donorsBySegment = (donations, startTime, endTime) => {
   const segments = { 0: 0, 50: 0, 150: 0, 250: 0, 500: 0, 1000: 0 };
-  donations.forEach((donation) => {
-    const amount = parseInt(donation["Account Amount"]);
-    const [, , year] = donation["Gift Date"].split("/");
-    const fullYear = parseInt(year) < 50 ? `20${year}` : `19${year}`;
-    if (parseInt(fullYear) >= startTime && parseInt(fullYear) <= endTime) {
-      switch (true) {
-        case isBetween(amount, 0, 49):
-          segments[0] = segments[0] += 1;
-          break;
-        case isBetween(amount, 50, 149):
-          segments[50] = segments[50] += 1;
-          break;
-        case isBetween(amount, 150, 249):
-          segments[150] = segments[150] += 1;
-          break;
-        case isBetween(amount, 250, 499):
-          segments[250] = segments[250] += 1;
-          break;
-        case isBetween(amount, 500, 999):
-          segments[500] = segments[500] += 1;
-          break;
-        default:
-          segments[1000] += 1;
-          break;
-      }
-    }
-  });
+  const avgGiftPerDonor = averageGiftPerDonor(donations, startTime, endTime);
 
+  for (const donorId in avgGiftPerDonor) {
+    const { total, timesDonated } = avgGiftPerDonor[donorId];
+    const amount = total / timesDonated;
+    switch (true) {
+      case isBetween(amount, 0, 49):
+        segments[0] = segments[0] += 1;
+        break;
+      case isBetween(amount, 50, 149):
+        segments[50] = segments[50] += 1;
+        break;
+      case isBetween(amount, 150, 249):
+        segments[150] = segments[150] += 1;
+        break;
+      case isBetween(amount, 250, 499):
+        segments[250] = segments[250] += 1;
+        break;
+      case isBetween(amount, 500, 999):
+        segments[500] = segments[500] += 1;
+        break;
+      default:
+        segments[1000] += 1;
+        break;
+    }
+  }
 
   return [
     {
@@ -427,37 +454,62 @@ export const donorsBySegment = (donations, startTime, endTime) => {
   ];
 };
 
-export const revenueBySegment = (donations, startTime, endTime) => {
-  let numberOfDonors = 0;
-  const segments = { 0: 0, 50: 0, 150: 0, 250: 0, 500: 0, 1000: 0 };
+const averageGiftPerDonor = (donations, startTime, endTime) => {
+  const donorsObj = {};
   donations.forEach((donation) => {
     const amount = parseInt(donation["Account Amount"]);
     const [, , year] = donation["Gift Date"].split("/");
     const fullYear = parseInt(year) < 50 ? `20${year}` : `19${year}`;
-    if (parseInt(fullYear) >= startTime && parseInt(fullYear) <= endTime) {
-      numberOfDonors += 1;
-      switch (true) {
-        case isBetween(amount, 0, 49):
-          segments[0] = segments[0] += 1;
-          break;
-        case isBetween(amount, 50, 149):
-          segments[50] = segments[50] += 1;
-          break;
-        case isBetween(amount, 150, 249):
-          segments[150] = segments[150] += 1;
-          break;
-        case isBetween(amount, 250, 499):
-          segments[250] = segments[250] += 1;
-          break;
-        case isBetween(amount, 500, 999):
-          segments[500] = segments[500] += 1;
-          break;
-        default:
-          segments[1000] += 1;
-          break;
+    const donorId = donation["Constituent ID"];
+    if (startTime && endTime) {
+      if (fullYear >= startTime && fullYear <= endTime) {
+        if (!(donorId in donorsObj)) {
+          donorsObj[donorId] = { total: 0, timesDonated: 0 };
+        }
+        donorsObj[donorId].total += amount;
+        donorsObj[donorId].timesDonated += 1;
       }
+    } else {
+      if (!(donorId in donorsObj)) {
+        donorsObj[donorId] = { total: 0, timesDonated: 0 };
+      }
+      donorsObj[donorId].total += amount;
+      donorsObj[donorId].timesDonated += 1;
     }
   });
+
+  return donorsObj;
+};
+
+export const revenueBySegment = (donations, startTime, endTime) => {
+  const segments = { 0: 0, 50: 0, 150: 0, 250: 0, 500: 0, 1000: 0 };
+  const avgGiftPerDonor = averageGiftPerDonor(donations, startTime, endTime);
+  const numberOfDonors = Object.keys(avgGiftPerDonor).length;
+
+  for (const donorId in avgGiftPerDonor) {
+    const { total, timesDonated } = avgGiftPerDonor[donorId];
+    const amount = total / timesDonated;
+    switch (true) {
+      case isBetween(amount, 0, 49):
+        segments[0] = segments[0] += 1;
+        break;
+      case isBetween(amount, 50, 149):
+        segments[50] = segments[50] += 1;
+        break;
+      case isBetween(amount, 150, 249):
+        segments[150] = segments[150] += 1;
+        break;
+      case isBetween(amount, 250, 499):
+        segments[250] = segments[250] += 1;
+        break;
+      case isBetween(amount, 500, 999):
+        segments[500] = segments[500] += 1;
+        break;
+      default:
+        segments[1000] += 1;
+        break;
+    }
+  }
 
   return [
     {
