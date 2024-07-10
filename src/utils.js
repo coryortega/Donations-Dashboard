@@ -237,9 +237,50 @@ export const averageDonorFrequency = (
   startTime = null,
   endTime = null
 ) => {
-  const numberOfDonations = getNumberOfDonations(donations, startTime, endTime);
-  const uniqueDonors = countUniqueDonors(donations, startTime, endTime);
-  return Math.round(numberOfDonations / uniqueDonors);
+  const yearsObj = {};
+
+  donations.forEach((donation) => {
+    const giftDate = donation["Gift Date"];
+    const donorId = donation["Constituent ID"];
+    const [, , year] = giftDate.split("/");
+    const giftYear =
+      parseInt(year) < 50 ? 2000 + parseInt(year) : 1900 + parseInt(year);
+
+    if (endTime && startTime) {
+      if (giftYear >= startTime && giftYear <= endTime) {
+        if (!(giftYear in yearsObj)) {
+          yearsObj[giftYear] = {
+            numberOfDonations: 0,
+            uniqueDonors: new Set(),
+          };
+        }
+        yearsObj[giftYear].numberOfDonations++;
+        yearsObj[giftYear].uniqueDonors.add(donorId);
+      }
+    } else {
+      if (!(giftYear in yearsObj)) {
+        yearsObj[giftYear] = { numberOfDonations: 0, uniqueDonors: new Set() };
+      }
+      yearsObj[giftYear].numberOfDonations++;
+      yearsObj[giftYear].uniqueDonors.add(donorId);
+    }
+  });
+
+  let sumFrequency = 0;
+  for (const year in yearsObj) {
+    const result =
+      yearsObj[year].numberOfDonations / yearsObj[year].uniqueDonors.size;
+    sumFrequency = sumFrequency + result;
+  }
+
+  return Math.round((sumFrequency / Object.keys(yearsObj).length) * 100) / 100 
+
+
+  // old way, keeping just in case
+  
+  // const numberOfDonations = getNumberOfDonations(donations, startTime, endTime);
+  // const uniqueDonors = countUniqueDonors(donations, startTime, endTime);
+  // return Math.round(numberOfDonations / uniqueDonors);
 };
 
 export const getUniqueYears = (donations) => {
