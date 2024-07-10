@@ -17,17 +17,24 @@ function sumAccountAmounts(arrayOfObjects, startTime = null, endTime = null) {
   return totalSum;
 }
 
-const getNumberOfDonors = (donations, startTime, endTime) => {
+const getNumberOfDonations = (donations, startTime = null, endTime = null) => {
   let number = 0;
 
   donations.forEach((obj) => {
     const giftDate = obj["Gift Date"];
     const [, , year] = giftDate.split("/");
+    const lastYear = new Date().getFullYear() - 1;
     const fullYear =
       parseInt(year) < 50 ? 2000 + parseInt(year) : 1900 + parseInt(year);
 
-    if (fullYear >= startTime && fullYear <= endTime) {
-      number = number + 1;
+    if (startTime && endTime) {
+      if (fullYear >= startTime && fullYear <= endTime) {
+        number = number + 1;
+      }
+    } else {
+      if (fullYear <= lastYear) {
+        number = number + 1;
+      }
     }
   });
 
@@ -121,7 +128,7 @@ export const averageGift = (data, startTime = null, endTime = null) => {
   const total = sumAccountAmounts(data, startTime, endTime);
   const numberOfDonations =
     startTime && endTime
-      ? getNumberOfDonors(data, startTime, endTime)
+      ? getNumberOfDonations(data, startTime, endTime)
       : data.length;
   return total / numberOfDonations;
 };
@@ -192,7 +199,7 @@ const countUniqueDonors = (
   // Iterate over each object in the array
   arrayOfObjects.forEach((obj) => {
     const giftDate = new Date(obj["Gift Date"]).getFullYear();
-    const currentYear = new Date().getFullYear();
+    const lastYear = new Date().getFullYear() - 1;
     // Check if startTime and endTime are provided and filter by time range
     if (startTime && endTime && "Gift Date" in obj) {
       if (giftDate >= startTime && giftDate <= endTime) {
@@ -200,7 +207,7 @@ const countUniqueDonors = (
       }
     } else {
       // Add all constituents if no time range is provided
-      if ("Constituent ID" in obj && giftDate < currentYear) {
+      if ("Constituent ID" in obj && giftDate <= lastYear) {
         uniqueConstituents.add(obj["Constituent ID"]);
       }
     }
@@ -230,10 +237,7 @@ export const averageDonorFrequency = (
   startTime = null,
   endTime = null
 ) => {
-  const numberOfDonations =
-    startTime && endTime
-      ? getNumberOfDonors(donations, startTime, endTime)
-      : donations.length;
+  const numberOfDonations = getNumberOfDonations(donations, startTime, endTime);
   const uniqueDonors = countUniqueDonors(donations, startTime, endTime);
   return Math.round(numberOfDonations / uniqueDonors);
 };
