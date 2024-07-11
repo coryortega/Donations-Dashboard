@@ -92,10 +92,23 @@ export const Import = () => {
     });
   };
 
+  const getCorrectFileNames = () => {
+    let fileNames = { donors: "", donations: "" };
+    files.forEach((name) => {
+      if ("Account Amount" in values[name][0]) {
+        fileNames.donations = name;
+      } else if ("Name" in values[name][0]) {
+        fileNames.donors = name;
+      }
+    });
+
+    return fileNames;
+  };
+
   const handleDashboardCreate = () => {
-    const donors = values["febccm_donors.csv"];
+    const donors = values[getCorrectFileNames().donors];
     const donorsObj = transformArrayToObject(donors);
-    const donations = values["febccm_gift.csv"];
+    const donations = values[getCorrectFileNames().donations];
     const lastYear = new Date().getFullYear() - 1;
     const endTime = lastYear;
     setDashboardData({

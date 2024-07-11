@@ -277,7 +277,6 @@ export const averageDonorFrequency = (
 
 
   // old way, keeping just in case
-  
   // const numberOfDonations = getNumberOfDonations(donations, startTime, endTime);
   // const uniqueDonors = countUniqueDonors(donations, startTime, endTime);
   // return Math.round(numberOfDonations / uniqueDonors);
