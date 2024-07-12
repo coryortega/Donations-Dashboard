@@ -273,8 +273,7 @@ export const averageDonorFrequency = (
     sumFrequency = sumFrequency + result;
   }
 
-  return Math.round((sumFrequency / Object.keys(yearsObj).length) * 100) / 100 
-
+  return Math.round((sumFrequency / Object.keys(yearsObj).length) * 100) / 100;
 
   // old way, keeping just in case
   // const numberOfDonations = getNumberOfDonations(donations, startTime, endTime);
@@ -656,6 +655,7 @@ export const getSingleAndMultiDonors = (donations) => {
 
 export const getDonorTypesByYear = (donations, donors) => {
   const donorTypesByYear = {};
+  const resultObj = {};
 
   donations.forEach((donation) => {
     const donorId = donation["Constituent ID"];
@@ -669,12 +669,21 @@ export const getDonorTypesByYear = (donations, donors) => {
     }
     if (donorType in donorTypesByYear[fullYear]) {
       donorTypesByYear[fullYear][donorType] =
-        donorTypesByYear[fullYear][donorType] + 1;
+        donorTypesByYear[fullYear][donorType].add(donorId);
     } else {
-      donorTypesByYear[fullYear][donorType] = 1;
+      donorTypesByYear[fullYear][donorType] = new Set([donorId]);
     }
   });
-  return donorTypesByYear;
+
+
+  for(const year in donorTypesByYear) {
+    resultObj[year] = {};
+    for (const donorType in donorTypesByYear[year]) {
+      resultObj[year][donorType] = donorTypesByYear[year][donorType].size; 
+    }
+  }
+
+  return resultObj;
 };
 
 export const transformDataByYear = (data, key) => {
