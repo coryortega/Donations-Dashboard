@@ -188,7 +188,7 @@ const calculateTotalYears = (arrayOfObjects) => {
   return Math.round(totalYears);
 };
 
-const countUniqueDonors = (
+export const countUniqueDonors = (
   arrayOfObjects,
   startTime = null,
   endTime = null
@@ -675,11 +675,10 @@ export const getDonorTypesByYear = (donations, donors) => {
     }
   });
 
-
-  for(const year in donorTypesByYear) {
+  for (const year in donorTypesByYear) {
     resultObj[year] = {};
     for (const donorType in donorTypesByYear[year]) {
-      resultObj[year][donorType] = donorTypesByYear[year][donorType].size; 
+      resultObj[year][donorType] = donorTypesByYear[year][donorType].size;
     }
   }
 
@@ -747,4 +746,27 @@ export const getDonorsPerYear = (donations) => {
   }
 
   return returnObj;
+};
+
+export const totalDonations = (donations) => {
+  return donations.length;
+};
+
+export const getDateRange = (arrayOfObjects) => {
+  // Initialize variables for min and max dates
+  let minDate = new Date(arrayOfObjects[0]["Gift Date"]);
+  let maxDate = new Date(arrayOfObjects[0]["Gift Date"]);
+
+  // Loop through each object in the array to find min and max dates
+  arrayOfObjects.forEach((obj) => {
+    const currentDate = new Date(obj["Gift Date"]);
+    if (currentDate < minDate) {
+      minDate = currentDate;
+    }
+    if (currentDate > maxDate) {
+      maxDate = currentDate;
+    }
+  });
+
+  return { minDate, maxDate }
 };

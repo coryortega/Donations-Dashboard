@@ -21,6 +21,9 @@ import {
   averageDonorGift,
   donorsBySegment,
   getDonorsPerYear,
+  totalDonations,
+  countUniqueDonors,
+  getDateRange,
 } from "../utils";
 
 const transformArrayToObject = (array) => {
@@ -112,7 +115,10 @@ export const Import = () => {
     const lastYear = new Date().getFullYear() - 1;
     const endTime = lastYear;
     setDashboardData({
+      total_donations: totalDonations(donations),
+      total_unique_donors: countUniqueDonors(donations),
       total_annual_donors: countGiftsByYear(donations),
+      date_range: getDateRange(donations),
       donors_per_year: getDonorsPerYear(donations),
       total_annual_donations: accumulateAmountByYear(donations),
       total_monthly_donations: revenuByMonth(donations),

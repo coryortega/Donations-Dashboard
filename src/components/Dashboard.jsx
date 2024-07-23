@@ -20,8 +20,51 @@ export const Dashboard = () => {
   if (Object.keys(dashboardData).length) {
     const { history } = dashboardData;
 
+    const options = {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    };
+
     return (
       <Box>
+        <Box
+          sx={{
+            display: "flex",
+            borderBottom: "1px solid #e0e0e0",
+            color: "#58595b",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              width: "100%",
+              justifyContent: "space-evenly",
+            }}
+          >
+            <Typography variant="overline">
+              Unique donors: {dashboardData.total_unique_donors}{" "}
+            </Typography>
+            <Typography variant="overline">
+              Donations: {dashboardData.total_donations}
+            </Typography>
+            <div>
+              <Typography variant="overline">
+                {dashboardData.date_range.minDate.toLocaleDateString(
+                  "en-US",
+                  options
+                )}{" "}
+              </Typography>{" "}
+              <Typography variant="overline">
+                -{" "}
+                {dashboardData.date_range.maxDate.toLocaleDateString(
+                  "en-US",
+                  options
+                )}
+              </Typography>
+            </div>
+          </div>
+        </Box>
         <Typography
           variant="h4"
           textAlign="center"
